@@ -19,4 +19,8 @@ public class EmploeeRepository {
         return query.setParameter("name", name).getResultList();
 
     }
+
+    public void save(List<Employee> employees) {
+        employees.forEach(s-> em.persist(s));
+    }
 }

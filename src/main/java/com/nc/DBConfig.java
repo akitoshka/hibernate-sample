@@ -20,7 +20,7 @@ import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
-@ComponentScan
+//@ComponentScan
 //@PropertySource("classpath:database.properties")
 public class DBConfig {
   @Bean
@@ -41,7 +41,8 @@ public class DBConfig {
     emFactory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
     Properties jpaProp = new Properties();
     jpaProp.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
-    jpaProp.setProperty("hibernate.hb2ddl.auto", "create");
+    jpaProp.setProperty("hibernate.hbm2ddl.auto", "create-drop");
+//    jpaProp.setProperty("javax.persistence.schema-generation.database.action", "create-drop");
     emFactory.setJpaProperties(jpaProp);
     emFactory.setPackagesToScan("com.nc.entity");
     return emFactory;
