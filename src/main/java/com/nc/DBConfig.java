@@ -1,55 +1,56 @@
 package com.nc;
 
-import javax.sql.DataSource;
+import com.mysql.fabric.jdbc.FabricMySQLDriver;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.SessionFactory;
+import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+
+
+import javax.sql.DataSource;
+import java.util.Properties;
 
 @Configuration
-@EnableTransactionManagement
-@PropertySource("classpath:database.properties")
+@ComponentScan
+//@PropertySource("classpath:database.properties")
 public class DBConfig {
-  @Autowired
-  private Environment env;
   @Bean
-  public HibernateTemplate hibernateTemplate() {
-    return new HibernateTemplate(sessionFactory());
-  }
-  @Bean
-  public SessionFactory sessionFactory() {
-    LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
-    lsfb.setDataSource(getDataSource());
-    lsfb.setPackagesToScan("com.concretepage.entity");
-    lsfb.setHibernateProperties(hibernateProperties());
-    try {
-      lsfb.afterPropertiesSet();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return lsfb.getObject();
-  }
-  @Bean
-  public DataSource getDataSource() {
-    BasicDataSource dataSource = new BasicDataSource();
-    dataSource.setDriverClassName(env.getProperty("database.driverClassName"));
-    dataSource.setUrl(env.getProperty("database.url"));
-    dataSource.setUsername(env.getProperty("database.username"));
-    dataSource.setPassword(env.getProperty("database.password"));
+  public DriverManagerDataSource dataSource(){
+    DriverManagerDataSource dataSource = new DriverManagerDataSource();
+    dataSource.setDriverClassName(com.mysql.jdbc.Driver.class.getName());
+    dataSource.setPassword("root");
+    dataSource.setUsername("root");
+    dataSource.setUrl("jdbc:mysql://localhost:3306/javastudy");
     return dataSource;
   }
+
   @Bean
-  public HibernateTransactionManager hibernateTransactionManager(){
-    return new HibernateTransactionManager(sessionFactory());
+  public LocalContainerEntityManagerFactoryBean entityManagerFactory(){
+    LocalContainerEntityManagerFactoryBean emFactory = new LocalContainerEntityManagerFactoryBean();
+    emFactory.setDataSource(dataSource());
+    emFactory.setPersistenceProviderClass(HibernatePersistenceProvider.class);
+    emFactory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+    Properties jpaProp = new Properties();
+    jpaProp.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
+    jpaProp.setProperty("hibernate.hb2ddl.auto", "create");
+    emFactory.setJpaProperties(jpaProp);
+    emFactory.setPackagesToScan("com.nc.entity");
+    return emFactory;
   }
-  private Properties hibernateProperties() {
-    Properties properties = new Properties();
-    properties.put("hibernate.dialect", env.getProperty("hibernate.dialect"));
-    properties.put("hibernate.id.new_generator_mappings", env.getProperty("hibernate.id.new_generator_mappings"));
-    properties.put("hibernate.show_sql", env.getProperty("hibernate.show_sql"));
-    properties.put("hibernate.format_sql", env.getProperty("hibernate.format_sql"));
-    return properties;
+
+  @Bean
+  public JpaTransactionManager transactionManager(){
+    JpaTransactionManager transactionManager = new JpaTransactionManager();
+    transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
+    return transactionManager;
   }
 }

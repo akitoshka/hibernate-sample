@@ -1,4 +1,4 @@
-package com.nc;
+package com.nc.entity;
 
 import java.io.Serializable;
 import javax.persistence.Column;
@@ -9,20 +9,18 @@ import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
-@Table
-public class Employee implements Serializable{
+public class Employee {
   @Id
-  @GeneratedValue(generator = "increment")
-  @GenericGenerator(name = "increment", strategy = "increment")
+  @GeneratedValue
   private int id;
   
-  @Column(name="firstName")
+//  @Column(name="firstName")
   private String firstName;
 
-  @Column(name="lastName")
+//  @Column(name="lastName")
   private String lastName;
 
-  @Column(name = "salary")
+//  @Column(name = "salary")
   private int salary;
 
   public Employee() {}
@@ -64,5 +62,15 @@ public class Employee implements Serializable{
 
   public void setSalary( int salary ) {
     this.salary = salary;
+  }
+
+  @Override
+  public String toString() {
+    return "Employee{" +
+            "id=" + id +
+            ", firstName='" + firstName + '\'' +
+            ", lastName='" + lastName + '\'' +
+            ", salary=" + salary +
+            '}';
   }
 }
